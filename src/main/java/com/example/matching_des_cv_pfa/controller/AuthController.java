@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -46,8 +47,8 @@ public class AuthController {
     }
     @PostMapping(path = "inscription/recruteur/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Recruteur registerRecruteur(
-            @RequestParam("prenom") String firstName,
-            @RequestParam("nom") String lastName,
+            @RequestParam("firstName") String firstName,
+            @RequestParam("lastName") String lastName,
             @RequestParam("email") String email,
             @RequestParam("telephone") String telephone,
             @RequestParam("password") String password,
@@ -77,7 +78,9 @@ public class AuthController {
         this.authService.passwordInitialisation(email);
         return  ResponseEntity.ok("Veuillez verifié votre email");
     }
+
     @GetMapping(path = "/DATA")
+    @PreAuthorize("hasAuthority('SCOPE_Admin')")
     public String DATA(@RequestParam("data") String data) {
         return data ;
     }

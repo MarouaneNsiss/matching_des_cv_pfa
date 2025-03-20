@@ -22,4 +22,9 @@ public class Beneficiaire extends Utilisateur {
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Competence> competences;
+    @OneToMany(mappedBy = "beneficiaire")
+    private List<Chat> chats ;
+
+    @OneToMany(mappedBy = "expediteur")
+    private List<Message> messages ;
 }
