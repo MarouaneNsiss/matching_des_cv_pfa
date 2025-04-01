@@ -68,8 +68,8 @@ public class SecurityConfig {
                         .frameOptions(frame -> frame.sameOrigin()) // Utilisation de "sameOrigin" pour autoriser les iframes dans les pages du même domaine
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/inscription/beneficiaire/register","/inscription/recruteur/register" ,"/swagger-ui/**", "/v3/**", "/inscription/**", "/login","/motDePasseOublié").permitAll() // Routes publiques
-                        .anyRequest().authenticated() // Toutes les autres requêtes nécessitent une authentification
+                        .requestMatchers("/inscription/beneficiaire/register","/inscription/recruteur/register" ,"/swagger-ui/**", "/v3/**", "/inscription/**", "/login","/motDePasseOublié","/api/offres/**").permitAll() // Routes publiques
+                        .anyRequest().permitAll() // Toutes les autres requêtes nécessitent une authentification
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())) // Active JWT pour OAuth2
                 .exceptionHandling(ex -> ex

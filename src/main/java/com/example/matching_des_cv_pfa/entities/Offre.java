@@ -20,11 +20,11 @@ public class Offre {
     private Long id;
     private String logo;
     private String title;
-    private String niveau_etudes_requis;
+    private String niveauEtudesRequis;
     private String description;
-    private String experiance;
+    private String niveauExperience;
     //this add just for web scraped jobs
-    private String link_to_details;
+    private String linkToDetails;
     private Date dateTime;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -32,19 +32,16 @@ public class Offre {
 
     @ElementCollection(targetClass = Region.class)
     @CollectionTable(name = "offre_Region", joinColumns = @JoinColumn(name = "offre_id"))
-    @Enumerated(EnumType.STRING)
     private List<Region> regions;
 
     @ElementCollection(targetClass = Contrat.class)
     @CollectionTable(name = "offre_Contrat", joinColumns = @JoinColumn(name = "offre_id"))
-    @Enumerated(EnumType.STRING)
     private List<Contrat> contrats;
+    @OneToMany(mappedBy = "offre", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OffreLangue> offreLangue;;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     Recruteur recruteur;
-
-
-
-
 
 }

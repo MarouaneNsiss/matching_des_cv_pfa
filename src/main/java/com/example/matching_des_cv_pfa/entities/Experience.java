@@ -6,8 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Data
@@ -27,8 +29,9 @@ public class Experience {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date dateFin;
     @ManyToOne
-    @JoinColumn(name = "beneficiaire_id")
+    @JoinColumn(name = "beneficiaire_id",nullable = false)
     private Beneficiaire beneficiaire;
-    @OneToMany(mappedBy = "experience")
-    private List<Tache> taches;
+    @OneToMany(mappedBy = "experience", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Tache> taches = new ArrayList<>();;
+
 }

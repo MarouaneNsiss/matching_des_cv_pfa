@@ -1,8 +1,8 @@
 package com.example.matching_des_cv_pfa.service;
 
+import com.example.matching_des_cv_pfa.dto.BeneficiareDTO;
 import com.example.matching_des_cv_pfa.dto.BenificiareRegistrationRequestDTO;
 import com.example.matching_des_cv_pfa.dto.RecruteurRegistrationRequestDto;
-import com.example.matching_des_cv_pfa.dto.passwordInitialisationRequestDto;
 import com.example.matching_des_cv_pfa.entities.Beneficiaire;
 import com.example.matching_des_cv_pfa.entities.Recruteur;
 import com.example.matching_des_cv_pfa.entities.Role;
@@ -19,8 +19,6 @@ import org.springframework.security.oauth2.jwt.*;
 import com.example.matching_des_cv_pfa.config.JwtTokenParams;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,7 +27,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AuthserviceImpl implements Authservice {
     private UtilisateurRepository utilisateurRepository;
-    private BenificiaireServiceImpl benificiaireService;
+    private BeneficiaireServiceImpl benificiaireService;
     private RecruteurService recruteurService;
     private PasswordEncoder passwordEncoder;
     private JwtEncoder jwtEncoder;
@@ -39,7 +37,7 @@ public class AuthserviceImpl implements Authservice {
     @Value("${jwt.issuer}")
     private String issuer;
 
-    public AuthserviceImpl(UtilisateurRepository utilisateurRepository,RecruteurService recruteurService, BenificiaireServiceImpl benificiaireService, PasswordEncoder passwordEncoder, JwtEncoder jwtEncoder, JwtDecoder jwtDecoder, JwtTokenParams jwtTokenParams, MailService mailService) {
+    public AuthserviceImpl(UtilisateurRepository utilisateurRepository, RecruteurService recruteurService, BeneficiaireServiceImpl benificiaireService, PasswordEncoder passwordEncoder, JwtEncoder jwtEncoder, JwtDecoder jwtDecoder, JwtTokenParams jwtTokenParams, MailService mailService) {
         this.utilisateurRepository = utilisateurRepository;
         this.benificiaireService = benificiaireService;
         this.passwordEncoder = passwordEncoder;
@@ -52,7 +50,7 @@ public class AuthserviceImpl implements Authservice {
 
 
     @Override
-    public Beneficiaire registerBenificiare(BenificiareRegistrationRequestDTO requestDTO,boolean activate) {
+    public BeneficiareDTO registerBenificiare(BenificiareRegistrationRequestDTO requestDTO,boolean activate) {
         Utilisateur utilisateur=utilisateurRepository.findByEmail(requestDTO.email());
         if (utilisateur != null) throw new EmailAlreadyUsedException("This email is already used");
         Beneficiaire beneficiaire= new Beneficiaire();
@@ -66,9 +64,9 @@ public class AuthserviceImpl implements Authservice {
         beneficiaire.setStatus(AccountStatus.CREATED);
         beneficiaire.setStatus(activate?AccountStatus.ACTIVATED:AccountStatus.CREATED);
         beneficiaire.setRoles(Collections.singletonList(Role.Benificiare));
-        Beneficiaire savedBenificiare = benificiaireService.saveBeneficiaire(beneficiaire);
-        verifyEmail(savedBenificiare.getId());
-        return savedBenificiare;
+        BeneficiareDTO savedBenificiareDTO = benificiaireService.saveBeneficiaire(beneficiaire);
+        verifyEmail(savedBenificiareDTO.getId());
+        return savedBenificiareDTO;
     }
 
     @Override

@@ -16,7 +16,7 @@ public class Competence {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nom;
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "competences",fetch = FetchType.LAZY)
     private List<Beneficiaire> beneficiaires;
 
     @ManyToMany(mappedBy = "competences",fetch = FetchType.LAZY)

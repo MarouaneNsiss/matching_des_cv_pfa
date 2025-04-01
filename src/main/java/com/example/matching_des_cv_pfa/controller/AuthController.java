@@ -1,5 +1,6 @@
 package com.example.matching_des_cv_pfa.controller;
 
+import com.example.matching_des_cv_pfa.dto.BeneficiareDTO;
 import com.example.matching_des_cv_pfa.dto.BenificiareRegistrationRequestDTO;
 import com.example.matching_des_cv_pfa.dto.LoginRequestDTO;
 import com.example.matching_des_cv_pfa.dto.RecruteurRegistrationRequestDto;
@@ -41,7 +42,7 @@ public class AuthController {
 
 
     @PostMapping(path = "inscription/beneficiaire/register")
-    public Beneficiaire registerBenificiaire(@RequestBody BenificiareRegistrationRequestDTO requestDTO){
+    public BeneficiareDTO registerBenificiaire(@RequestBody BenificiareRegistrationRequestDTO requestDTO){
         return  this.authService.registerBenificiare(requestDTO,false);
     }
     @PostMapping(path = "inscription/recruteur/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

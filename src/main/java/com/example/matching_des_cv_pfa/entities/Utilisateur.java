@@ -42,4 +42,6 @@ public class Utilisateur {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private List<Role> roles;
+    //after i will remove image attr
+    private String ImagePath;
 }

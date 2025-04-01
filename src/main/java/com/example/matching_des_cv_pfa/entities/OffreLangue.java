@@ -1,20 +1,28 @@
 package com.example.matching_des_cv_pfa.entities;
 
+import com.example.matching_des_cv_pfa.enums.LangueLevel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Tache {
+@Entity
+public class OffreLangue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String description;
+
     @ManyToOne
-    @JoinColumn(name = "experience_id",nullable = false)
-    private Experience experience;
+    @JoinColumn(name = "offre_id")
+    private Offre offre;
+
+    @ManyToOne
+    @JoinColumn(name = "langue_id")
+    private Langue langue;
+
+    @Enumerated(EnumType.STRING)
+    private LangueLevel level;
 }

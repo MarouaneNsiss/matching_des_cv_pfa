@@ -21,4 +21,5 @@ public class RecruteurServiceImpl implements RecruteurService{
     public Recruteur saveRecruteur(Recruteur recruteur) {
         return recruteurRepository.save(recruteur);
     }
+
 }

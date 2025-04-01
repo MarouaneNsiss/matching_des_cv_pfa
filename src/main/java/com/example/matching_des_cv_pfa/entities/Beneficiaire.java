@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Data
@@ -13,13 +15,13 @@ import java.util.List;
 @NoArgsConstructor
 public class Beneficiaire extends Utilisateur {
 
-    @Lob
-    @Column(name = "cv", columnDefinition = "LONGBLOB") // Stockage optimisé pour un fichier CV
-    private byte[] cv;
+    private String cv;
 
-    @OneToMany(mappedBy = "beneficiaire", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Experience> experiences;
+    @OneToMany(mappedBy ="beneficiaire",cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
+    private List<Experience> experiences=new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Competence> competences;
+    @ManyToMany( fetch = FetchType.LAZY)
+    private List<Competence> competences = new ArrayList<>();;
+
+
 }
