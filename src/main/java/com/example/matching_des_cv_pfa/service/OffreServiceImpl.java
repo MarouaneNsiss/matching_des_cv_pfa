@@ -86,6 +86,7 @@ public class OffreServiceImpl implements OffreService {
         Recruteur recruteur = recruteurRepository.findById(offreDetailsDTO.getOffreDTO().getRecruteurId())
                 .orElseThrow(() -> new RecruteurNotFoundException("Recruteur not found"));
         offre.setRecruteur(recruteur);
+        offre.setLogo(recruteur.getImagePath());
 
         Offre savedOffre = this.offreRepository.save(offre);
         return this.offreMapper.ToOffreDetailsDTO(savedOffre);

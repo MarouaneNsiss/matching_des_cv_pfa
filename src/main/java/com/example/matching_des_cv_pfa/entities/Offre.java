@@ -41,7 +41,7 @@ public class Offre {
     private List<OffreLangue> offreLangue;;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "recruteur_id", nullable = true)
     Recruteur recruteur;
 
 }

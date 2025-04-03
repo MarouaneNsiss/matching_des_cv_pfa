@@ -28,6 +28,7 @@ public class OffreDTO {
     private List<String> competances;
     private Date dateTime;
     private String linkToDetails;
+    private Boolean isScraped;
 
     private Long recruteurId;
 }

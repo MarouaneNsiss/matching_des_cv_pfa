@@ -1,6 +1,6 @@
 package com.example.matching_des_cv_pfa.service;
 
-import com.example.matching_des_cv_pfa.dto.BeneficiareDTO;
+import com.example.matching_des_cv_pfa.dto.BeneficiaireDTO;
 import com.example.matching_des_cv_pfa.entities.Beneficiaire;
 import com.example.matching_des_cv_pfa.entities.Competence;
 import com.example.matching_des_cv_pfa.entities.Experience;
@@ -13,6 +13,9 @@ import com.example.matching_des_cv_pfa.repository.ExperienceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,17 +43,13 @@ public class BeneficiaireServiceImpl implements BeneficiaireService {
 
 
     @Override
-    public BeneficiareDTO saveBeneficiaire(Beneficiaire beneficiaire) {
+    public BeneficiaireDTO saveBeneficiaire(Beneficiaire beneficiaire) {
         return this.beneficiaireMapper.fromBeneficaire(beneficiaireRepository.save(beneficiaire));
     }
 
-    @Override
-    public List<Beneficiaire> getAllBeneficiaires() {
-        return beneficiaireRepository.findAll();
-    }
 
     @Override
-    public BeneficiareDTO getBeneficiaireByEmail(String email) throws BeneficiaireNotFoundException {
+    public BeneficiaireDTO getBeneficiaireByEmail(String email) throws BeneficiaireNotFoundException {
         log.info("getBeneficiaireByEmail");
         Beneficiaire beneficiare  =  beneficiaireRepository.findByEmail(email);
         if (beneficiare == null){
@@ -60,13 +59,13 @@ public class BeneficiaireServiceImpl implements BeneficiaireService {
 
     }
     @Override
-    public BeneficiareDTO createBeneficiaire(
-            BeneficiareDTO beneficiareDTO,
+    public BeneficiaireDTO createBeneficiaire(
+            BeneficiaireDTO beneficiaireDTO,
             MultipartFile imageFile,
             MultipartFile cvFile
     ) throws IOException {
         // Convert DTO to entity
-        Beneficiaire beneficiaire = beneficiaireMapper.fromBeneficaireDTO(beneficiareDTO);
+        Beneficiaire beneficiaire = beneficiaireMapper.fromBeneficaireDTO(beneficiaireDTO);
         // Handle competences
         if (beneficiaire.getCompetences() != null) {
             List<Competence> savedCompetences = new ArrayList<>();
@@ -123,9 +122,9 @@ public class BeneficiaireServiceImpl implements BeneficiaireService {
         return beneficiaireMapper.fromBeneficaire(savedBeneficiaire);
     }
     @Override
-    public BeneficiareDTO updateBeneficiaire(
+    public BeneficiaireDTO updateBeneficiaire(
             Long id,
-            BeneficiareDTO beneficiareDTO,
+            BeneficiaireDTO beneficiaireDTO,
             MultipartFile imageFile,
             MultipartFile cvFile
     ) throws IOException, BeneficiaireNotFoundException {
@@ -138,7 +137,7 @@ public class BeneficiaireServiceImpl implements BeneficiaireService {
         String fullName = existingBeneficiaire.getNom() + " " + existingBeneficiaire.getPrenom();
 
         // Update basic information
-        Beneficiaire updatedBeneficiaire = this.beneficiaireMapper.fromBeneficaireDTO(beneficiareDTO);
+        Beneficiaire updatedBeneficiaire = this.beneficiaireMapper.fromBeneficaireDTO(beneficiaireDTO);
 
         // Handle competences with careful persistence
         if (updatedBeneficiaire.getCompetences() != null && !updatedBeneficiaire.getCompetences().isEmpty()) {
@@ -162,7 +161,7 @@ public class BeneficiaireServiceImpl implements BeneficiaireService {
             existingBeneficiaire.setCompetences(new ArrayList<>());
         }
 
-        if (beneficiareDTO.getExperiences() != null) {
+        if (beneficiaireDTO.getExperiences() != null) {
             // Work with the existing collection instead of replacing it
             List<Experience> existingExperiences = existingBeneficiaire.getExperiences();
 
@@ -251,12 +250,19 @@ public class BeneficiaireServiceImpl implements BeneficiaireService {
         return beneficiaireMapper.fromBeneficaire(savedBeneficiaire);
     }
     @Override
-    public BeneficiareDTO getBeneficiare(Long beneficiareId) throws BeneficiaireNotFoundException {
+    public BeneficiaireDTO getBeneficiare(Long beneficiareId) throws BeneficiaireNotFoundException {
         log.info("get beneficiare by id : {}", beneficiareId);
         Beneficiaire beneficiaire = this.beneficiaireRepository.findById(beneficiareId).orElseThrow(
                 () -> new BeneficiaireNotFoundException("Beneficiare not found")
         );
         return this.beneficiaireMapper.fromBeneficaire(beneficiaire);
+    }
+    @Override
+    public Page<BeneficiaireDTO> getAllBeneficiaires(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Beneficiaire> beneficiaireS = this.beneficiaireRepository.findAll(pageable);
+        return beneficiaireS.map(this.beneficiaireMapper::ToBeneDTOwithoutExperiences);
+
     }
 
 

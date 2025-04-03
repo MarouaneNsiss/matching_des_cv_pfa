@@ -1,5 +1,6 @@
 package com.example.matching_des_cv_pfa.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -16,6 +17,7 @@ import java.text.Normalizer;
 import java.util.Locale;
 
 @Service
+@Slf4j
 public class FileStorageServiceImpl implements FileStorageService {
 
     private final Path imageStorageLocation;
@@ -100,6 +102,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         try {
             Path storageLocation = isImage ? imageStorageLocation : cvStorageLocation;
             Path filePath = storageLocation.resolve(fileName).normalize();
+            log.info("Deleting file: " + filePath);
             Files.deleteIfExists(filePath);
         } catch (IOException ex) {
             throw new RuntimeException("Could not delete file " + fileName, ex);
@@ -111,9 +114,8 @@ public class FileStorageServiceImpl implements FileStorageService {
         return storageLocation.resolve(fileName).normalize();
     }
     @Override
-    public Resource loadFileAsResource(String fileName, Path storageLocation) {
+    public Resource loadFileAsResource(String fileName, Path filePath) {
         try {
-            Path filePath = storageLocation.resolve(fileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
             if (resource.exists()) {
                 return resource;

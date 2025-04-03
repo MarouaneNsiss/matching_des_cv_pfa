@@ -1,15 +1,10 @@
 package com.example.matching_des_cv_pfa.controller;
 
-import com.example.matching_des_cv_pfa.dto.BeneficiareDTO;
-import com.example.matching_des_cv_pfa.dto.BenificiareRegistrationRequestDTO;
-import com.example.matching_des_cv_pfa.dto.LoginRequestDTO;
-import com.example.matching_des_cv_pfa.dto.RecruteurRegistrationRequestDto;
-import com.example.matching_des_cv_pfa.entities.Beneficiaire;
+import com.example.matching_des_cv_pfa.dto.*;
 import com.example.matching_des_cv_pfa.entities.Recruteur;
 import com.example.matching_des_cv_pfa.enums.Gender;
 import com.example.matching_des_cv_pfa.service.Authservice;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,7 +14,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,31 +36,17 @@ public class AuthController {
 
 
     @PostMapping(path = "inscription/beneficiaire/register")
-    public BeneficiareDTO registerBenificiaire(@RequestBody BenificiareRegistrationRequestDTO requestDTO){
+    public BeneficiaireDTO registerBenificiaire(@RequestBody BenificiareRegistrationRequestDTO requestDTO){
         return  this.authService.registerBenificiare(requestDTO,false);
     }
     @PostMapping(path = "inscription/recruteur/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Recruteur registerRecruteur(
-            @RequestParam("prenom") String firstName,
-            @RequestParam("nom") String lastName,
-            @RequestParam("email") String email,
-            @RequestParam("telephone") String telephone,
-            @RequestParam("password") String password,
-            @RequestParam("gender") Gender gender,
-            @RequestParam("entreprise") String entreprise,
-            @RequestParam("ville") String ville,
-            @RequestParam("adresse") String adresse,
-            @RequestParam("jobFunction") String jobFunction,
-            @RequestParam("pays") String pays,
-            @RequestParam("number_employees") String number_employees,
-            @RequestParam("site") String site,
-            @RequestParam("logo") MultipartFile logo) throws IOException {
-
-        RecruteurRegistrationRequestDto requestDTO = new RecruteurRegistrationRequestDto( entreprise,  adresse,  ville,  pays,  number_employees, site,logo.getBytes() ,gender, firstName,  lastName, jobFunction , telephone ,  email,  password);
-
+    public RecruteurDTO registerRecruteur(
+            @RequestPart(value = "recruteurDTO") RecruteurDTO recruteurDTO,
+            @RequestPart("imageFile")MultipartFile imageFile) throws IOException {
+        log.info("{}",recruteurDTO.getEmail());
 
         // Appel du service pour enregistrer le recruteur
-        return this.authService.registerRecruteur(requestDTO, false);
+        return this.authService.registerRecruteur(recruteurDTO,imageFile,false);
     }
 
     @GetMapping(path = "inscription/public/emailActivation")

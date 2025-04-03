@@ -1,8 +1,8 @@
 package com.example.matching_des_cv_pfa.service;
 
-import com.example.matching_des_cv_pfa.dto.BeneficiareDTO;
+import com.example.matching_des_cv_pfa.dto.BeneficiaireDTO;
 import com.example.matching_des_cv_pfa.dto.BenificiareRegistrationRequestDTO;
-import com.example.matching_des_cv_pfa.dto.RecruteurRegistrationRequestDto;
+import com.example.matching_des_cv_pfa.dto.RecruteurDTO;
 import com.example.matching_des_cv_pfa.entities.Beneficiaire;
 import com.example.matching_des_cv_pfa.entities.Recruteur;
 import com.example.matching_des_cv_pfa.entities.Role;
@@ -10,14 +10,20 @@ import com.example.matching_des_cv_pfa.entities.Utilisateur;
 import com.example.matching_des_cv_pfa.enums.AccountStatus;
 import com.example.matching_des_cv_pfa.exceptions.EmailAlreadyUsedException;
 import com.example.matching_des_cv_pfa.exceptions.EmailNotFoundException;
+import com.example.matching_des_cv_pfa.mappers.RecruteurMapper;
 import com.example.matching_des_cv_pfa.repository.UtilisateurRepository;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.*;
 import com.example.matching_des_cv_pfa.config.JwtTokenParams;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -36,23 +42,36 @@ public class AuthserviceImpl implements Authservice {
     private MailService mailService;
     @Value("${jwt.issuer}")
     private String issuer;
+    private RecruteurMapper recruteurMapper;
+    private FileStorageService fileStorageService;
 
-    public AuthserviceImpl(UtilisateurRepository utilisateurRepository, RecruteurService recruteurService, BeneficiaireServiceImpl benificiaireService, PasswordEncoder passwordEncoder, JwtEncoder jwtEncoder, JwtDecoder jwtDecoder, JwtTokenParams jwtTokenParams, MailService mailService) {
+    public AuthserviceImpl(UtilisateurRepository utilisateurRepository, BeneficiaireServiceImpl benificiaireService, RecruteurService recruteurService, PasswordEncoder passwordEncoder, JwtEncoder jwtEncoder, JwtDecoder jwtDecoder, JwtTokenParams jwtTokenParams, MailService mailService, FileStorageService fileStorageService, RecruteurMapper recruteurMapper) {
         this.utilisateurRepository = utilisateurRepository;
         this.benificiaireService = benificiaireService;
+        this.recruteurService = recruteurService;
         this.passwordEncoder = passwordEncoder;
         this.jwtEncoder = jwtEncoder;
         this.jwtDecoder = jwtDecoder;
         this.jwtTokenParams = jwtTokenParams;
         this.mailService = mailService;
-      this.recruteurService=recruteurService;
+        this.fileStorageService = fileStorageService;
+        this.recruteurMapper = recruteurMapper;
     }
 
 
     @Override
-    public BeneficiareDTO registerBenificiare(BenificiareRegistrationRequestDTO requestDTO,boolean activate) {
+    public BeneficiaireDTO registerBenificiare(BenificiareRegistrationRequestDTO requestDTO, boolean activate) {
         Utilisateur utilisateur=utilisateurRepository.findByEmail(requestDTO.email());
-        if (utilisateur != null) throw new EmailAlreadyUsedException("This email is already used");
+        if (utilisateur != null ){
+
+                // If email exists but is not verified  status, allow re-registration
+            if (!utilisateur.isEmailVerified()) {
+                    // Delete the existing user
+                utilisateurRepository.delete(utilisateur);
+            } else {
+                    throw new EmailAlreadyUsedException("This email is already used");
+            }
+        }
         Beneficiaire beneficiaire= new Beneficiaire();
         beneficiaire.setPrenom(requestDTO.firstName());
         beneficiaire.setNom(requestDTO.lastName());
@@ -64,36 +83,39 @@ public class AuthserviceImpl implements Authservice {
         beneficiaire.setStatus(AccountStatus.CREATED);
         beneficiaire.setStatus(activate?AccountStatus.ACTIVATED:AccountStatus.CREATED);
         beneficiaire.setRoles(Collections.singletonList(Role.Benificiare));
-        BeneficiareDTO savedBenificiareDTO = benificiaireService.saveBeneficiaire(beneficiaire);
+        BeneficiaireDTO savedBenificiareDTO =  benificiaireService.saveBeneficiaire(beneficiaire);
         verifyEmail(savedBenificiareDTO.getId());
         return savedBenificiareDTO;
     }
 
     @Override
-    public Recruteur registerRecruteur(RecruteurRegistrationRequestDto requestDTO, boolean activate) {
-        Utilisateur utilisateur=utilisateurRepository.findByEmail(requestDTO.email());
-        if (utilisateur != null) throw new EmailAlreadyUsedException("This email is already used");
-        Recruteur recruteur= new Recruteur();
-        recruteur.setPrenom(requestDTO.firstName());
-        recruteur.setNom(requestDTO.lastName());
-        recruteur.setEmail(requestDTO.email());
-        recruteur.setAdresse(requestDTO.adresse());
-        recruteur.setSite(requestDTO.site());
-        recruteur.setPays(requestDTO.pays());
-        recruteur.setTelephone(requestDTO.telephone());
-        recruteur.setVille(requestDTO.ville());
-        recruteur.setEntreprise(requestDTO.entreprise());
-        recruteur.setNumber_employees(requestDTO.number_employees());
-        recruteur.setJobFunction(requestDTO.jobFunction());
-        recruteur.setImage(requestDTO.logo());
-        recruteur.setPassword(passwordEncoder.encode(requestDTO.password()));
-        recruteur.setGender(requestDTO.gender());
-        recruteur.setStatus(AccountStatus.CREATED);
+    public RecruteurDTO registerRecruteur(RecruteurDTO recruteurDTO, MultipartFile imageFile, boolean activate) {
+        Utilisateur utilisateur=utilisateurRepository.findByEmail(recruteurDTO.getEmail());
+        if (utilisateur != null){
+            // If email exists but is not verified  status, allow re-registration
+            if (!utilisateur.isEmailVerified()) {
+                // Delete the existing user
+                utilisateurRepository.delete(utilisateur);
+            } else {
+                throw new EmailAlreadyUsedException("This email is already used");
+            }
+        }
+        Recruteur recruteur = this.recruteurMapper.fromRecruteurDTO(recruteurDTO);
+        recruteur.setPassword(passwordEncoder.encode(recruteurDTO.getPassword()));
         recruteur.setStatus(activate?AccountStatus.ACTIVATED:AccountStatus.CREATED);
-        recruteur.setRoles(Collections.singletonList(Role.Recruteur));
-        Recruteur savedRecruteur = recruteurService.saveRecruteur(recruteur);
+        Recruteur savedRecruteur = this.recruteurService.saveRecruteur(recruteur);
+        String fullName = savedRecruteur.getNom() + " " + savedRecruteur.getPrenom();
+        // Handle image file
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String imagePath = fileStorageService.storeImage(
+                    imageFile,
+                    fullName,
+                    savedRecruteur.getId()
+            );
+            savedRecruteur.setImagePath(imagePath);
+        }
         verifyEmail(savedRecruteur.getId());
-        return savedRecruteur;
+        return this.recruteurMapper.fromRecruteur(savedRecruteur);
     }
 
     @Override

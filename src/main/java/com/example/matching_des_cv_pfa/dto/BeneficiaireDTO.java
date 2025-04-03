@@ -1,8 +1,6 @@
 package com.example.matching_des_cv_pfa.dto;
 
 
-import com.example.matching_des_cv_pfa.entities.Competence;
-import com.example.matching_des_cv_pfa.entities.Experience;
 import com.example.matching_des_cv_pfa.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +11,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BeneficiareDTO {
+public class BeneficiaireDTO {
     private Long id;
     private String nom;
     private String prenom;

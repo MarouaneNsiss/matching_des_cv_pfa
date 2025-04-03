@@ -1,5 +1,6 @@
-package com.example.matching_des_cv_pfa.entities;
+package com.example.matching_des_cv_pfa.dto;
 
+import com.example.matching_des_cv_pfa.entities.Role;
 import com.example.matching_des_cv_pfa.enums.AccountStatus;
 import com.example.matching_des_cv_pfa.enums.Gender;
 import jakarta.persistence.*;
@@ -7,20 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
 import java.util.List;
-
-@Entity
-@Table(name = "utilisateur")
-@Inheritance(strategy = InheritanceType.JOINED) // Permet l'héritage en base de données
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class Utilisateur {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@AllArgsConstructor
+public class RecruteurDTO {
     private Long id;
-
     private String nom;
     private String prenom;
     private String bio;
@@ -28,18 +21,17 @@ public class Utilisateur {
     private String telephone;
     private String password;
     private String adresse;
-
     private boolean emailVerified;
-
-    @Enumerated(EnumType.STRING)
-    private AccountStatus status;
-
-    @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    private List<Role> roles;
-    //after i will remove image attr
     private String ImagePath;
+    private Role role;
+
+    private String entreprise;
+    private String ville;
+    private String pays;
+    private String number_employees;
+    private String site;
+    private String jobFunction;
+
 }
