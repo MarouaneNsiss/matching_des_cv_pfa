@@ -24,7 +24,7 @@ public class RecruteurDTO {
     private boolean emailVerified;
     private Gender gender;
 
-    private String ImagePath;
+    private byte[] Image;
     private Role role;
 
     private String entreprise;

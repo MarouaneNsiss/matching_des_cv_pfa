@@ -7,22 +7,30 @@ import com.example.matching_des_cv_pfa.entities.Competence;
 import com.example.matching_des_cv_pfa.entities.Offre;
 import com.example.matching_des_cv_pfa.entities.OffreLangue;
 import com.example.matching_des_cv_pfa.entities.Recruteur;
+import com.example.matching_des_cv_pfa.service.FileStorageService;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class OffreMapperImpl implements OffreMapper {
 
     private final LangueMapper langueMapper;
-
+    private final FileStorageService fileStorageService;
     @Autowired
-    public OffreMapperImpl(LangueMapper langueMapper) {
+    public OffreMapperImpl(LangueMapper langueMapper, FileStorageService fileStorageService) {
         this.langueMapper = langueMapper;
+        this.fileStorageService = fileStorageService;
     }
 
     @Override
@@ -31,19 +39,17 @@ public class OffreMapperImpl implements OffreMapper {
 
         // Map direct properties
         offreDTO.setId(offre.getId());
-        offreDTO.setLogo(offre.getLogo());
         offreDTO.setTitle(offre.getTitle());
         offreDTO.setNiveauEtudesRequis(offre.getNiveauEtudesRequis());
         offreDTO.setNiveauExperience(offre.getNiveauExperience());
         offreDTO.setDateTime(offre.getDateTime());
         offreDTO.setLinkToDetails(offre.getLinkToDetails());
-        offreDTO.setRecruteurId(offre.getRecruteur().getId());
 
         // Map regions and contrats
         offreDTO.setRegions(offre.getRegions());
         offreDTO.setContrats(offre.getContrats());
 
-        // extract just the names of competences
+        // Extract just the names of competences
         if (offre.getCompetences() != null) {
             List<String> competenceNames = offre.getCompetences().stream()
                     .map(Competence::getNom)
@@ -53,12 +59,35 @@ public class OffreMapperImpl implements OffreMapper {
             offreDTO.setCompetances(new ArrayList<>());
         }
 
-        if (offre.getRecruteur() != null) {
-            offreDTO.setNom_entreprise(offre.getRecruteur().getEntreprise());
+        // Handle logo assignment
+        if (offre.getIsScraped() || offre.getRecruteur() == null) {
+            // Scraped offer: Use the URL directly
+            offreDTO.setEntreprise(offre.getEntreprise());
+            offreDTO.setLogoURL(offre.getLogoURL());
+            offreDTO.setLogo(null);// No byte[] data for scraped offers
+            offreDTO.setIsScraped(Boolean.TRUE);
+        } else {
+            // Manually added offer: Convert logo to byte[] if needed
+            offreDTO.setRecruteurId(offre.getRecruteur().getId());
+            offreDTO.setEntreprise(offre.getRecruteur().getEntreprise());
             offreDTO.setSite(offre.getRecruteur().getSite());
+
+            if (offre.getLogo() != null) {
+                try {
+                    // Read logo file as byte array
+                    Path logoPath = fileStorageService.getFilePath(offre.getLogo(), true);
+                    byte[] logoBytes = Files.readAllBytes(logoPath);
+                    offreDTO.setLogo(logoBytes);
+                } catch (IOException e) {
+                    log.error("Error loading logo for offer: " + offre.getId(), e);
+                    offreDTO.setLogo(null);
+                }
+            }
         }
+
         return offreDTO;
     }
+
 
     @Override
     public Offre fromOffreDTO(OffreDTO offreDTO) {
@@ -74,6 +103,7 @@ public class OffreMapperImpl implements OffreMapper {
         } else {
             offre.setCompetences(new ArrayList<>());
         }
+
 
 
         return offre;

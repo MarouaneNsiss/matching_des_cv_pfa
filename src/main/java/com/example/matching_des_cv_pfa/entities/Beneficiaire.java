@@ -15,7 +15,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class Beneficiaire extends Utilisateur {
 
-    private String cv;
+    private String cvPath;
 
     @OneToMany(mappedBy ="beneficiaire",cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
     private List<Experience> experiences=new ArrayList<>();

@@ -112,7 +112,7 @@ public class BeneficiaireServiceImpl implements BeneficiaireService {
                     fullName,
                     savedBeneficiaire.getId()
             );
-            savedBeneficiaire.setCv(cvPath);
+            savedBeneficiaire.setCvPath(cvPath);
         }
 
         // Update with file paths
@@ -226,8 +226,8 @@ public class BeneficiaireServiceImpl implements BeneficiaireService {
         // Handle CV file update
         if (cvFile != null && !cvFile.isEmpty()) {
             // Delete old CV if exists
-            if (existingBeneficiaire.getCv() != null) {
-                fileStorageService.deleteFile(existingBeneficiaire.getCv(), false);
+            if (existingBeneficiaire.getCvPath() != null) {
+                fileStorageService.deleteFile(existingBeneficiaire.getCvPath(), false);
             }
 
             // Store new CV
@@ -236,7 +236,7 @@ public class BeneficiaireServiceImpl implements BeneficiaireService {
                     fullName,
                     existingBeneficiaire.getId()
             );
-            existingBeneficiaire.setCv(cvPath);
+            existingBeneficiaire.setCvPath(cvPath);
         }
 
         // Carefully merge properties

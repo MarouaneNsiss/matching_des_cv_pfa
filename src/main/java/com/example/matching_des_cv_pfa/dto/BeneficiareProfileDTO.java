@@ -14,8 +14,6 @@ public class BeneficiareProfileDTO {
     private String email;
     private String telephone;
     private String adresse;
-
-    private String imagePath;
     private Gender gender;
     private List<String> competences;
 

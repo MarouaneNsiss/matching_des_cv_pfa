@@ -17,9 +17,12 @@ import java.util.List;
 @NoArgsConstructor
 public class OffreDTO {
     private Long id;
-    private String logo;
+    //this for scraped offre because just a url
+    private String logoURL;
+    //and this for manual offer
+    private byte[] logo;
     private String title;
-    private String nom_entreprise;
+    private String entreprise;
     private String site;
     private String niveauEtudesRequis;
     private String niveauExperience;

@@ -20,10 +20,10 @@ public class BeneficiaireDTO {
     private String telephone;
     private String adresse;
 
-    private String imagePath;
+    private byte[] image;
     private Gender gender;
 
-    private String cv;
+    private byte[] cv;
     private List<ExperienceDTO> experiences;
     private List<String> competences;
 

@@ -83,10 +83,12 @@ public class OffreServiceImpl implements OffreService {
         }
         offre.setOffreLangue(savedOffreLangues);
         // Handle recruteur
-        Recruteur recruteur = recruteurRepository.findById(offreDetailsDTO.getOffreDTO().getRecruteurId())
-                .orElseThrow(() -> new RecruteurNotFoundException("Recruteur not found"));
-        offre.setRecruteur(recruteur);
-        offre.setLogo(recruteur.getImagePath());
+        if(!offre.getIsScraped() || offreDetailsDTO.getOffreDTO().getRecruteurId() != null) {
+            Recruteur recruteur = recruteurRepository.findById(offreDetailsDTO.getOffreDTO().getRecruteurId())
+                    .orElseThrow(() -> new RecruteurNotFoundException("Recruteur not found"));
+            offre.setRecruteur(recruteur);
+            offre.setLogo(recruteur.getImagePath());
+        }
 
         Offre savedOffre = this.offreRepository.save(offre);
         return this.offreMapper.ToOffreDetailsDTO(savedOffre);
@@ -167,6 +169,7 @@ public class OffreServiceImpl implements OffreService {
 
         // This returns Page<Offre>
         Page<Offre> offrePage = offreRepository.findAll(pageable);
+        log.info("{}",offrePage.getSize());
 
         // Convert to Page<OffreDTO> while keeping pagination metadata
         Page<OffreDTO> offreDTOS = offrePage.map(offre -> offreMapper.fromOffre(offre));

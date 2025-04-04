@@ -18,7 +18,12 @@ public class Offre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    //i add logoUrl and entreprise filed for just scrapped offres
+    //because not scraped offres has already entreprise and logo on assigned
+    //recruteur
+    private String logoURL;
     private String logo;
+    private String entreprise;
     private String title;
     private String niveauEtudesRequis;
     private String description;
@@ -26,6 +31,7 @@ public class Offre {
     //this add just for web scraped jobs
     private String linkToDetails;
     private Date dateTime;
+    private Boolean isScraped;
 
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Competence> competences;

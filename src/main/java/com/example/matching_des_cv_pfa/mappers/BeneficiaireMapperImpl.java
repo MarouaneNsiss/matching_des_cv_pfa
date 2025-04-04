@@ -6,19 +6,27 @@ import com.example.matching_des_cv_pfa.dto.ExperienceDTO;
 import com.example.matching_des_cv_pfa.entities.Beneficiaire;
 import com.example.matching_des_cv_pfa.entities.Competence;
 import com.example.matching_des_cv_pfa.entities.Experience;
+import com.example.matching_des_cv_pfa.service.FileStorageService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class BeneficiaireMapperImpl implements BeneficiaireMapper {
     private ExperienceMapper experienceMapper;
+    private FileStorageService  fileStorageService;
 
-    public BeneficiaireMapperImpl(ExperienceMapper experienceMapper) {
+    public BeneficiaireMapperImpl(ExperienceMapper experienceMapper, FileStorageService fileStorageService) {
         this.experienceMapper = experienceMapper;
+        this.fileStorageService = fileStorageService;
     }
 
     @Override
@@ -35,6 +43,32 @@ public class BeneficiaireMapperImpl implements BeneficiaireMapper {
                     competence -> competence.getNom()
             ).collect(Collectors.toList());
             beneficiaireDTO.setCompetences(competances);
+        }
+        if (beneficiaire.getImagePath() != null) {
+            try {
+                // Read logo file as byte array
+                Path imagePath = fileStorageService.getFilePath(beneficiaire.getImagePath(), true);
+                byte[] imageBytes = Files.readAllBytes(imagePath);
+                beneficiaireDTO.setImage(imageBytes);
+            } catch (IOException e) {
+                log.error("Error loading logo for offer: " + beneficiaire.getId(), e);
+                beneficiaireDTO.setImage(null);
+            }
+        }
+        if (beneficiaire.getCvPath() != null) {
+            try {
+                // Read logo file as byte array
+                Path cvPath = fileStorageService.getFilePath(beneficiaire.getCvPath(), false);
+                log.info("Loading CV Path: " + cvPath.toString());
+                byte[] cvBytes = Files.readAllBytes(cvPath);
+                beneficiaireDTO.setCv(cvBytes);
+            } catch (IOException e) {
+                log.error("Error loading logo for offer: " + beneficiaire.getId(), e);
+                beneficiaireDTO.setCv(null);
+            }
+
+        }else{
+            log.error("Error loading cv for bene: " + beneficiaire.getCvPath());
         }
 
 

@@ -58,7 +58,7 @@ public class MatchingDesCvPfaApplication {
 			//System.out.println("Deleted Offre ID: " + savedOffre.getId());
 		};
 	}
-	@Bean
+	//@Bean
 	CommandLineRunner testSaveRecruteur(RecruteurRepository recruteurRepository) {
 		return args -> {
 			System.out.println("Saving a test recruteur...");
